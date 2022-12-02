@@ -1,4 +1,5 @@
 from rest_framework.permissions import BasePermission
+from django.contrib.auth.models import Group
 
 
 class ClientPermission(BasePermission):
@@ -11,7 +12,7 @@ class ClientPermission(BasePermission):
     def has_object_permission(self, request, view, obj):
         # permet la creation de client au membre du groupe de Gestion et de vente
         if request.method == "POST":
-            if "Vente" in request.user.groups:
+            if Group.objects.get(name="Vente") in request.user.groups.all():
                 return True
 
         # Permet a tous les utilisateur de voir les clients
@@ -20,9 +21,9 @@ class ClientPermission(BasePermission):
 
         # Authorise la modification uniquement si l'utilisateur est dnas l'équipe Gestion ou vente
         elif request.method == "PUT" or request.method == "DELETE":
-            if "Gestion" in request.user.groups:
+            if Group.objects.get(name="Gestion") in request.user.groups.all():
                 return True
-            if "Vente" in request.user.groups:
+            if Group.objects.get(name="Vente") in request.user.groups.all():
                 if obj.sales_contact == request.user:
                     return True
 
